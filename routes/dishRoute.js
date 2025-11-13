@@ -7,7 +7,7 @@ import {
 } from "../controllers/dishController.js";
 
 import { upload } from "../config/multer.js";
-
+import { adminMiddleware } from 'common-utils'
 const dishRouter = express.Router();
 
 // image storage Engine
@@ -21,9 +21,9 @@ const dishRouter = express.Router();
 
 // const upload = multer({ storage: storage });
 
-dishRouter.post("/create", upload.single("image"), createDish);
+dishRouter.post("/create", adminMiddleware, upload.single("image"), createDish);
 dishRouter.get("/all", getAllDish);
-dishRouter.delete("/:id", deleteDish);
+dishRouter.delete("/:id", adminMiddleware, deleteDish);
 dishRouter.get("/:id", getDishById);
 
 export default dishRouter;
