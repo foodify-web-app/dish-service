@@ -20,6 +20,6 @@
     "multer": "^1.4.5-lts.1",
     "multer-storage-cloudinary": "^4.0.0",
     "nodemon": "^3.1.10",
-    "common-utils": "git+https://github.com/foodify-web-app/common-utils.git"
+    "common-utils": "file:./common-utils"
   }
 }
