@@ -59,6 +59,18 @@ const getDishById = async (req, res) => {
   }
 };
 
+//food by id
+
+const getAllDishByRestaurantId = async (req, res) => {
+  try {
+    const food = await foodModel.find({ restaurantId: req.params.id });
+    res.json({ success: true, data: food });
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: "Error" });
+  }
+};
+
 // remove food item
 
 const deleteDish = async (req, res) => {
@@ -74,4 +86,22 @@ const deleteDish = async (req, res) => {
   }
 };
 
-export { createDish, getAllDish, deleteDish, getDishById };
+// Update restaurant
+const updateDish = async (req, res) => {
+  try {
+    const dish = await foodModel.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
+    );
+    if (!dish) {
+      return res.json({ success: false, message: "dish not found" });
+    }
+    res.json({ success: true, message: "Dish updated", data: dish });
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: "Error" });
+  }
+};
+
+export { createDish, getAllDish, deleteDish, getDishById, getAllDishByRestaurantId, updateDish };

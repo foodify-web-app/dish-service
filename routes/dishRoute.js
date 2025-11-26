@@ -3,7 +3,9 @@ import {
   createDish,
   deleteDish,
   getAllDish,
+  getAllDishByRestaurantId,
   getDishById,
+  updateDish,
 } from "../controllers/dishController.js";
 
 import { upload } from "../config/multer.js";
@@ -23,7 +25,9 @@ const dishRouter = express.Router();
 
 dishRouter.post("/create", adminMiddleware, upload.single("image"), createDish);
 dishRouter.get("/all", getAllDish);
-dishRouter.delete("/:id", adminMiddleware, deleteDish);
 dishRouter.get("/:id", getDishById);
+dishRouter.delete("/:id", adminMiddleware, deleteDish);
+dishRouter.get("/restaurant/:id", getAllDishByRestaurantId);
+dishRouter.put("/update/:id", updateDish);
 
 export default dishRouter;
