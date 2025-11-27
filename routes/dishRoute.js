@@ -22,12 +22,12 @@ const dishRouter = express.Router();
 // });
 
 // const upload = multer({ storage: storage });
-
 dishRouter.post("/create", adminMiddleware, upload.single("image"), createDish);
 dishRouter.get("/all", getAllDish);
 dishRouter.get("/:id", getDishById);
 dishRouter.delete("/:id", adminMiddleware, deleteDish);
 dishRouter.get("/restaurant/:id", getAllDishByRestaurantId);
-dishRouter.put("/update/:id", updateDish);
+dishRouter.put("/update/image/:id",adminMiddleware, upload.single("image"), updateDish);
+dishRouter.put("/update/dish/:id", adminMiddleware, updateDish);
 
 export default dishRouter;

@@ -129,9 +129,18 @@ const deleteDish = async (req, res) => {
 // Update restaurant
 const updateDish = async (req, res) => {
   try {
+    const imageURL = req.file?.path;
+    let formData = req.body;
+    if (imageURL != null) {
+      formData = {
+        ...formData,
+        image: imageURL,
+      }
+    }
+
     const dish = await foodModel.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      formData,
       { new: true }
     );
     if (!dish) {
@@ -139,7 +148,7 @@ const updateDish = async (req, res) => {
     }
     res.json({ success: true, message: "Dish updated", data: dish });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.json({ success: false, message: "Error" });
   }
 };
