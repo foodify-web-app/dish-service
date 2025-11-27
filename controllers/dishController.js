@@ -4,27 +4,67 @@ import foodModel from "../models/foodModel.js";
 
 // add food
 
-const createDish = async (req, res) => {
-  const imageUrl = req.file?.path; // Cloudinary returns the URL in .path
-  const food = new foodModel({
-    name: req.body.name,
-    description: req.body.description,
-    price: req.body.price,
-    category: req.body.category,
-    image: imageUrl,
-  });
+// const createDish = async (req, res) => {
+//   const imageUrl = req.file?.path; // Cloudinary returns the URL in .path
+//   const food = new foodModel({
+//     name: req.body.name,
+//     description: req.body.description,
+//     price: req.body.price,
+//     category: req.body.category,
+//     image: imageUrl,
+//     restaurantId: req.body.restaurantId,
+//   });
 
+//   try {
+//     await food.save();
+//     // await redis.deleteCache('all_menu_items');
+//     // const cacheKey = 'all_menu_items';
+//     // await redis.setCache(cacheKey, await foodModel.find({}));
+//     return res.json({ success: true, message: "Food Added" });
+//   } catch (error) {
+//     console.log(error);
+//     return res.json({ success: false, message: "Error" });
+//   }
+// };
+
+const createDish = async (req, res) => {
   try {
+    const imageUrl = req.file?.path; // Cloudinary uploads using multer-storage-cloudinary
+
+    const {
+      name,
+      description,
+      price,
+      category,
+      restaurantId,
+      veg,
+      isAvailable,
+      tags
+    } = req.body;
+
+    const food = new foodModel({
+      name,
+      description,
+      price,
+      category,
+      restaurantId,
+      image: imageUrl,
+
+      // Optional fields
+      veg: veg === "false" ? false : true,             // because FormData sends strings
+      isAvailable: isAvailable === "false" ? false : true,
+      tags: typeof tags === "string" ? tags.split(",") : [],
+    });
+
     await food.save();
-    // await redis.deleteCache('all_menu_items');
-    // const cacheKey = 'all_menu_items';
-    // await redis.setCache(cacheKey, await foodModel.find({}));
-    return res.json({ success: true, message: "Food Added" });
+
+    return res.json({ success: true, message: "Food Added Successfully" });
   } catch (error) {
     console.log(error);
-    return res.json({ success: false, message: "Error" });
+    return res.json({ success: false, message: "Error Adding Food" });
   }
 };
+
 
 //All food list
 
