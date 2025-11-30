@@ -1,89 +1,31 @@
 import cloudinary from "../config/cloudinary.js";
-import foodModel from "../models/foodModel.js";
-// import redis from '../config/redis.js';
+import foodRepository from "../repositories/foodRepository.js";
 
 // add food
-
-// const createDish = async (req, res) => {
-//   const imageUrl = req.file?.path; // Cloudinary returns the URL in .path
-//   const food = new foodModel({
-//     name: req.body.name,
-//     description: req.body.description,
-//     price: req.body.price,
-//     category: req.body.category,
-//     image: imageUrl,
-//     restaurantId: req.body.restaurantId,
-//   });
-
-//   try {
-//     await food.save();
-//     // await redis.deleteCache('all_menu_items');
-//     // const cacheKey = 'all_menu_items';
-//     // await redis.setCache(cacheKey, await foodModel.find({}));
-//     return res.json({ success: true, message: "Food Added" });
-//   } catch (error) {
-//     console.log(error);
-//     return res.json({ success: false, message: "Error" });
-//   }
-// };
-
 const createDish = async (req, res) => {
   try {
     const imageUrl = req.file?.path; // Cloudinary uploads using multer-storage-cloudinary
-
-    const {
-      name,
-      description,
-      price,
-      category,
-      restaurantId,
-      veg,
-      isAvailable,
-      tags
-    } = req.body;
-
-    const food = new foodModel({
-      name,
-      description,
-      price,
-      category,
-      restaurantId,
+    const food = {
       image: imageUrl,
-
-      // Optional fields
-      veg: veg === "false" ? false : true,             // because FormData sends strings
-      isAvailable: isAvailable === "false" ? false : true,
-      tags: typeof tags === "string" ? tags.split(",") : [],
-    });
-
-    await food.save();
-
-    return res.json({ success: true, message: "Food Added Successfully" });
+      veg: req.body.veg === "false" ? false : true,
+      ...req.body,
+    };
+    const newDish = await foodRepository.create(food);
+    return res.json({ success: true, message: "Dish Added Successfully", data: newDish });
   } catch (error) {
     console.log(error);
-    return res.json({ success: false, message: "Error Adding Food" });
+    return res.json({ success: false, message: "Error Adding Dish" });
   }
 };
 
 
 //All food list
-
 const getAllDish = async (req, res) => {
   try {
-    // const cacheKey = 'all_menu_items';
-
-    // const cachedData = await redis.getCache(cacheKey);
-
-    // if (cachedData) {
-    //   return res.json({ success: true, data: cachedData });
-    // }
-    // If cache is empty, fetch from database
-    const foods = await foodModel.find({});
-    // await redis.setCache(cacheKey, foods);
-    res.json({ success: true, data: foods });
+    const allDishes = await foodRepository.findAll();
+    res.json({ success: true, data: allDishes });
   } catch (error) {
-    console.log(error);
-    res.json({ success: false, message: "Error" });
+    res.json({ success: false, message: `Error fetching dishes ${error.message}` });
   }
 };
 
@@ -91,38 +33,32 @@ const getAllDish = async (req, res) => {
 
 const getDishById = async (req, res) => {
   try {
-    const food = await foodModel.find({ _id: req.params.id });
+    const food = await foodRepository.findById(req.params.id);
     res.json({ success: true, data: food });
   } catch (error) {
-    console.log(error);
-    res.json({ success: false, message: "Error" });
+    res.json({ success: false, message: `Error fetching dish ${error.message}` });
   }
 };
 
 //food by id
-
 const getAllDishByRestaurantId = async (req, res) => {
   try {
-    const food = await foodModel.find({ restaurantId: req.params.id });
+    const food = await foodRepository.findByRestaurantId(req.params.id);
     res.json({ success: true, data: food });
   } catch (error) {
-    console.log(error);
-    res.json({ success: false, message: "Error" });
+    res.json({ success: false, message: `Error fetching dishes by restaurant ${error.message}` });
   }
 };
 
 // remove food item
-
 const deleteDish = async (req, res) => {
   try {
-    const food = await foodModel.findById(req.params.id);
+    const food = await foodRepository.findById(req.params.id);
     await cloudinary.uploader.destroy(food.image)
-    // fs.unlink(`uploads/${food.image}`, () => { });
-    await foodModel.findByIdAndDelete(req.params.id);
-    res.json({ success: true, message: "Food Removed" });
+    await foodRepository.deleteById(req.params.id);
+    res.json({ success: true, message: "Dish Removed" });
   } catch (error) {
-    console.log(error);
-    res.json({ success: false, message: "Error" });
+    res.json({ success: false, message: `Error removing dish ${error.message}` });
   }
 };
 
@@ -138,18 +74,16 @@ const updateDish = async (req, res) => {
       }
     }
 
-    const dish = await foodModel.findByIdAndUpdate(
+    const dish = await foodRepository.updateById(
       req.params.id,
       formData,
-      { new: true }
     );
     if (!dish) {
-      return res.json({ success: false, message: "dish not found" });
+      return res.json({ success: false, message: "Dish not found" });
     }
     res.json({ success: true, message: "Dish updated", data: dish });
   } catch (error) {
-    console.error(error);
-    res.json({ success: false, message: "Error" });
+    res.json({ success: false, message: `Error updating dish ${error.message}` });
   }
 };
 
